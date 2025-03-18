@@ -173,11 +173,11 @@ class Shooter(Subsystem):
                 "Velocity", self._shooter_left.get_velocity().value_as_double
             )
 
-### DISABLED
-        # if self._shooter_ramp_angle.isConnected():
-        #     SmartDashboard.putNumber(
-        #         "Encoder Pos", self._shooter_ramp_angle.getAbsolutePosition()
-        #     )
+        if self._shooter_ramp_angle.isConnected():
+            SmartDashboard.putNumber(
+                # "Encoder Pos", self._shooter_ramp_angle.getAbsolutePosition()  
+                "Encoder Pos", self._shooter_ramp_angle.get()  #  Changed from getAbsolutePosition() to get()
+            )
 
     def shooter_at_speed(self) -> bool:
         # For some reason the simulator speed is broken, so if we're in the simulator
@@ -204,21 +204,22 @@ class Shooter(Subsystem):
 
     def move_ramp_to_location(self) -> None:
         speed = 0
-        ####  DISABLED 
         # curr_location = self._shooter_ramp_angle.getAbsolutePosition()
-        # if curr_location < (self._curr_location.value[LOCATION] - 0.001):
-        #     # Ramp needs to move up
-        #     speed = 1
-        # elif curr_location > (self._curr_location.value[LOCATION] - 0.001):
-        #     # Ramp needs to move down
-        #     speed = -1
-        # else:
-        #     speed = 0
-        # self._shooter_ramp.set(ControlMode.PercentOutput, speed)
+        curr_location = self._shooter_ramp_angle.get()    #  Changed from getAbsolutePosition() to get()
+        if curr_location < (self._curr_location.value[LOCATION] - 0.001):
+            # Ramp needs to move up
+            speed = 1
+        elif curr_location > (self._curr_location.value[LOCATION] - 0.001):
+            # Ramp needs to move down
+            speed = -1
+        else:
+            speed = 0
+        self._shooter_ramp.set(ControlMode.PercentOutput, speed)
 
     def shooter_at_angle(self) -> bool:
         curr_diff = (
-            self._shooter_ramp_angle.getAbsolutePosition()
+            self._shooter_ramp_angle.get()         #  Changed from getAbsolutePosition() to get()
+            # self._shooter_ramp_angle.getAbsolutePosition()
             - self._curr_location.value[LOCATION]
         )
         SmartDashboard.putNumber("ShooterDiff", curr_diff)

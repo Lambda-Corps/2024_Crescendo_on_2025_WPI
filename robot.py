@@ -29,7 +29,7 @@ from intake import Intake, IntakeCommand, DefaultIntakeCommand, EjectNote
 from shooter import Shooter, SetShooter, ShooterPosition
 from robot_commands import ShootCommand, StopIndexAndShooter, DoubleShootCommand
 from leds import LEDSubsystem, FlashLEDCommand
-from climber import Climber, MoveClimber
+#######  (Removed Climber from Robot) from climber import Climber, MoveClimber
 from vision import VisionSystem
 import constants
 from typing import Tuple, List
@@ -73,8 +73,9 @@ class MyRobot(TimedCommandRobot):
 
         self._leds: LEDSubsystem = LEDSubsystem()
 
-        self._climber: Climber = Climber()
-        wpilib.SmartDashboard.putData("Climber", self._climber)
+#######  (Removed Climber from Robot)
+        # self._climber: Climber = Climber()
+        # wpilib.SmartDashboard.putData("Climber", self._climber)
 
         self._vision: VisionSystem = VisionSystem(False, True)
         # self._vision: VisionSystem = VisionSystem(True, True)
@@ -140,14 +141,15 @@ class MyRobot(TimedCommandRobot):
         # Eject Note
         self._partner_controller.b().whileTrue(EjectNote(self._intake))
 
-        # Right Trigger Climber Up
-        self._partner_controller.rightTrigger().whileTrue(
-            MoveClimber(self._climber, 0.4).withName("ClimberUp")
-        )
-        # Left Trigger Climber Down
-        self._partner_controller.leftTrigger().whileTrue(
-            MoveClimber(self._climber, -0.4).withName("ClimberDown")
-        )
+#######  (Removed Climber from Robot)
+        # # Right Trigger Climber Up
+        # self._partner_controller.rightTrigger().whileTrue(
+        #     MoveClimber(self._climber, 0.4).withName("ClimberUp")
+        # )
+        # # Left Trigger Climber Down
+        # self._partner_controller.leftTrigger().whileTrue(
+        #     MoveClimber(self._climber, -0.4).withName("ClimberDown")
+        # )
         # # Climber up for 10 seconds
         # self._partner_controller.rightBumper().onTrue(
         #     MoveClimber(self._climber, 1, 25).withName("ClimberUp25")
