@@ -222,41 +222,31 @@ class MyRobot(TimedCommandRobot):
         # Register the named commands used by the PathPlanner auto builder
         # These commands have to match exactly in the PathPlanner application
         # as we name them here in the registration
-        NamedCommands.registerCommand(
-            "AutoShoot", ShootCommand(self._intake, self._shooter)
-        )
-        NamedCommands.registerCommand(
-            "DoubleAutoShoot", DoubleShootCommand(self._intake, self._shooter)
-        )
-        NamedCommands.registerCommand(
-            "AutoIntake_tm2",
-            IntakeCommand(self._intake).withTimeout(2).withName("AutoIntake 2"),
-        )
+        # NamedCommands.registerCommand(
+        #     "AutoShoot", ShootCommand(self._intake, self._shooter)
+        # )
+        # NamedCommands.registerCommand(
+        #     "AutoShoot", ShootCommand(self._intake, self._shooter)
+        # )
+        # # NamedCommands.registerCommand(
+        # #     "DoubleAutoShoot", DoubleShootCommand(self._intake, self._shooter)
+        # # )
+        # NamedCommands.registerCommand(
+        #     "AutoIntake_tm2",
+        #     IntakeCommand(self._intake).withTimeout(2).withName("AutoIntake 2"),
+        # )
 
-        NamedCommands.registerCommand(
-            "AutoIntake_tm3",
-            IntakeCommand(self._intake).withTimeout(3).withName("AutoIntake 3"),
-        )
-        NamedCommands.registerCommand(
-            "AutoIntake_tm5",
-            IntakeCommand(self._intake).withTimeout(5).withName("AutoIntake 5"),
-        )
-        NamedCommands.registerCommand(
-            "SetShooterRampToSpeaker",
-            SetShooter(self._shooter, ShooterPosition.SUBWOOFER_2).withTimeout(5),
-        )
-        NamedCommands.registerCommand(
-            "SetShooterRampToMin",
-            SetShooter(self._shooter, ShooterPosition.MIN).withTimeout(8),
-        )
-        NamedCommands.registerCommand(
-            "SetShooterRampToPoint",
-            SetShooter(self._shooter, ShooterPosition.RING3AUTO).withTimeout(8),
-        )
-
-        NamedCommands.registerCommand(
-            "TurnToSourceSide", TurnToAnglePID(self._drivetrain, -90, 2)
-        )
+        # NamedCommands.registerCommand(
+        #     "SetShooterRampToSpeaker",
+        #     SetShooter(self._shooter, ShooterPosition.SUBWOOFER_2).withTimeout(5),
+        # )
+        # NamedCommands.registerCommand(
+        #     "SetShooterRampToMin",
+        #     SetShooter(self._shooter, ShooterPosition.MIN).withTimeout(8),
+        # )
+        # NamedCommands.registerCommand(
+        #     "TurnToSourceSide", TurnToAnglePID(self._drivetrain, -90, 2)
+        # )
 
         # increasing Qelems numbers, tries to drive more conservatively as the effect
         # In the math, what we're doing is weighting the error less heavily, meaning,
@@ -279,11 +269,12 @@ class MyRobot(TimedCommandRobot):
         # [-10, 10],
         # [-11, 11],
         # [-12, 12],
-        q_elems = [0.09, 0.19, 3.7]
-        r_elems = [-9, 9]
+        # q_elems = [0.09, 0.19, 3.7]
+        # r_elems = [-9, 9]
         if RobotBase.isSimulation():
             q_elems = [0.09, 0.19, 3.7]
             r_elems = [-10, 10]
+
 
         # AutoBuilder.configureLTV(
         #     self._drivetrain.get_robot_pose,
@@ -298,47 +289,17 @@ class MyRobot(TimedCommandRobot):
         #     self._drivetrain,  # Reference to this subsystem to set requirements
         # )
 
+
         # To configure the Autonomous routines use PathPlanner to define the auto routines
         # Then, take all of the path planner created routines and add them to the auto
         # chooser so the drive team can select the starting auto.
-        # self._auto_chooser: wpilib.SendableChooser = wpilib.SendableChooser()
-        # self._auto_chooser.setDefaultOption(
-        #     "Sub 2 - Two Ring", PathPlannerAuto("OneRingSub2")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 2 - Three Ring", PathPlannerAuto("TwoRingSub2")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 2 - Four Ring", PathPlannerAuto("FourRingSub2")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 3 - Ring 7", PathPlannerAuto("Sub3ThreeRing7")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 2 - ThreeLong", PathPlannerAuto("Sub2ThreeRingLong")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 2 - Three Stage", PathPlannerAuto("ThreeRingSub2Stage")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 1 - ThreeLong", PathPlannerAuto("Sub1ThreeRingLong")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 1 - Wait10Drive", PathPlannerAuto("Sub1ShootWait10Drive")
-        # )
-        # self._auto_chooser.addOption(
-        #     "Sub 1 - Wait10 FAST", PathPlannerAuto("Sub1ShootWait10DriveFAST")
-        # )
-        # self._auto_chooser.addOption("Sub3Disruptor", PathPlannerAuto("Sub3Disruptor"))
-        # self._auto_chooser.addOption(
-        #     "ShootOnly", ShootCommand(self._intake, self._shooter)
-        # )
+        self._auto_chooser: wpilib.SendableChooser = wpilib.SendableChooser()
+        self._auto_chooser.setDefaultOption("AutoOne", PathPlannerAuto("AutoOne"))
 
-        # self._auto_chooser.addOption(
-        #     "Sub 2 - Four FAST", PathPlannerAuto("FourRingSub2Fast")
-        # )
-
-        # wpilib.SmartDashboard.putData("AutoChooser", self._auto_chooser)
+        self._auto_chooser.addOption(
+            "AutoTwo", PathPlannerAuto("AutoTwo")
+        )
+        wpilib.SmartDashboard.putData("AutoChooser", self._auto_chooser)
 
     def __configure_led_triggers(self) -> None:
         # note_trigger: Trigger = Trigger(self._intake.has_note).onTrue(

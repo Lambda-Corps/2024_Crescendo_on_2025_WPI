@@ -72,12 +72,18 @@ class Shooter(Subsystem):
 
         self._motor_rps = SPEAKER_RPS
 
-        if RobotBase.isSimulation():
-            self._shooter_sim: FlywheelSim = FlywheelSim(
-                DCMotor.falcon500(1), constants.SHOOTER_GEARING, constants.SHOOTER_MOI
-            )
+#   File "C:\_Robotics\2025\2024_Crescendo_on_2025_WPI\shooter.py", line 76, in __init__
+#     self._shooter_sim: FlywheelSim = FlywheelSim(
+#                                      ^^^^^^^^^^^^
+# TypeError: __init__(): incompatible constructor arguments. The following argument types are supported:
+#     1. wpilib.simulation._simulation.FlywheelSim(plant: wpimath._controls._controls.system.LinearSystem_1_1_1, gearbox: wpimath._controls._controls.plant.DCMotor, measurementStdDevs: Annotated[list[float], FixedSize(1)] = [0.0])
 
-            self._sim_counter = 0
+        # if RobotBase.isSimulation():
+        #     self._shooter_sim: FlywheelSim = FlywheelSim(
+        #         DCMotor.falcon500(1), constants.SHOOTER_GEARING, constants.SHOOTER_MOI
+        #     )
+
+            # self._sim_counter = 0
 
         self._angle = 0
 
@@ -228,29 +234,29 @@ class Shooter(Subsystem):
     def stop_shooter_ramp(self) -> None:
         self._shooter_ramp.set(ControlMode.PercentOutput, 0)
 
-    def simulationPeriodic(self) -> None:
-        feed_enable(constants.ROBOT_PERIOD_MS * 2)
+    # def simulationPeriodic(self) -> None:
+        # feed_enable(constants.ROBOT_PERIOD_MS * 2)
 
-        # Start the motor simulation work flow by passing robot battery voltage to sim motors
-        self._shooter_left.sim_state.set_supply_voltage(
-            RobotController.getBatteryVoltage()
-        )
-        self._shooter_right.sim_state.set_supply_voltage(
-            RobotController.getBatteryVoltage()
-        )
+        # # Start the motor simulation work flow by passing robot battery voltage to sim motors
+        # self._shooter_left.sim_state.set_supply_voltage(
+        #     RobotController.getBatteryVoltage()
+        # )
+        # self._shooter_right.sim_state.set_supply_voltage(
+        #     RobotController.getBatteryVoltage()
+        # )
 
-        # Apply the motor inputs to the simulation
-        self._shooter_sim.setInput([self._shooter_left.sim_state.motor_voltage])
+        # # Apply the motor inputs to the simulation
+        # self._shooter_sim.setInput([self._shooter_left.sim_state.motor_voltage])
 
-        # advance the simulation model a timing loop
-        self._shooter_sim.update(constants.ROBOT_PERIOD_MS)
+        # # advance the simulation model a timing loop
+        # self._shooter_sim.update(constants.ROBOT_PERIOD_MS)
 
-        # Update the motor values with the new calculated values from the physics engine
-        self._shooter_left.sim_state.set_rotor_velocity(
-            self.__radianspersec_to_rotationspersec(
-                self._shooter_sim.getAngularVelocity()
-            )
-        )
+        # # Update the motor values with the new calculated values from the physics engine
+        # self._shooter_left.sim_state.set_rotor_velocity(
+        #     self.__radianspersec_to_rotationspersec(
+        #         self._shooter_sim.getAngularVelocity()
+        #     )
+        # )
 
     def __radianspersec_to_rotationspersec(self, rad_per_sec: float) -> float:
         # One radian per second equates to 0.0159154943, use that
