@@ -246,29 +246,37 @@ class NoteDetectionPhotonCamera:
         self._latest_result: PhotonPipelineResult = PhotonPipelineResult()
 
     def update_camera_results(self) -> None:
-        self._latest_result = self._camera.getLatestResult()
+        # self._latest_result = self._camera.getLatestResult()
+        self._latest_result = self._camera.getAllUnreadResults()    ### Updates based on PhotoVision Docs
 
     def get_note_yaw(self) -> float:
         """
         Return a float value of the target yaw
         """
-        target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
+        # target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
+        # target_list: List[PhotonTrackedTarget] = self._latest_result.getBestTarget()  ### Updates based on PhotoVision Docs
+        best_target = self._latest_result.getBestTarget()  ### Updates based on PhotoVision Docs  FINDS BEST TARGET
 
-        # If there are no current results, return 1000 to signify no target
-        if len(target_list) == 0:
-            # we have no targets
-            return 1000
+        # Source:    https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html
 
-        largest_target = PhotonTrackedTarget()
-        # Iterate through each target and grab the largest area,
-        # which hopefully means we're looking at the closest target
-        for target in target_list:
-            if target.getArea() > largest_target.getArea():
-                # This one is bigger
-                largest_target = target
+        # # If there are no current results, return 1000 to signify no target
+        # if len(target_list) == 0:
+        #     # we have no targets
+        #     return 1000
+
+        # # largest_target = PhotonTrackedTarget()
+        # largest_target = target_list
+
+        # # Iterate through each target and grab the largest area,
+        # # which hopefully means we're looking at the closest target
+        # for target in target_list:
+        #     if target.getArea() > largest_target.getArea():
+        #         # This one is bigger
+        #         largest_target = target
 
         # Return the yaw from the target
-        return largest_target.getYaw()
+        # return largest_target.getYaw()   ####
+        return best_target.getYaw()
 
 
 class SimpleTagDetectionPhotonCamera:
