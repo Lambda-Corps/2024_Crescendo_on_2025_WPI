@@ -77,7 +77,8 @@ class MyRobot(TimedCommandRobot):
         # self._climber: Climber = Climber()
         # wpilib.SmartDashboard.putData("Climber", self._climber)
 
-        self._vision: VisionSystem = VisionSystem(False, True)
+        self._vision: VisionSystem = VisionSystem(True, False)  # Enable April tags
+        # self._vision: VisionSystem = VisionSystem(False, True)
         # self._vision: VisionSystem = VisionSystem(True, True)
 
         self.__configure_default_commands()
@@ -106,14 +107,21 @@ class MyRobot(TimedCommandRobot):
         )
         # Right Trigger April Tag
         # Create a button that maps to the proper integer number (found in driverstation)
-        self._right_controller_button: JoystickButton = JoystickButton(
-            self._driver_controller.getHID(), 9  # TODO -- Assign this correct number
-        )
-        self._right_controller_button.whileTrue(
+        # self._right_controller_button: JoystickButton = JoystickButton(
+        #     self._driver_controller.getHID(), 9  # TODO -- Assign this correct number
+        # )
+
+        self._driver_controller.leftBumper().whileTrue(
             TeleopDriveWithVision(
                 self._drivetrain, self._vision.get_tag_yaw, self._driver_controller
             ).withName("Tag Driving")
         )
+
+        # self._right_controller_button.whileTrue(
+        #     TeleopDriveWithVision(
+        #         self._drivetrain, self._vision.get_tag_yaw, self._driver_controller
+        #     ).withName("Tag Driving")
+        # )
 
         # self._driver_controller.rightBumper().whileTrue(
         #     RunCommand(

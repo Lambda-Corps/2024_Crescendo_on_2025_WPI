@@ -796,6 +796,57 @@ class TeleopDriveWithVision(Command):
                 yaw = -self._controller.getRightX()
         else:
             yaw = self._calculate_yaw(yaw)
+            print ("Yaw: ", yaw)
+
+        SmartDashboard.putNumber("Yaw", yaw)
+        self._dt.drive_teleop(forward, yaw)
+
+    def isFinished(self) -> bool:
+        # Should only run while button is held, return False
+        return False
+
+    def _calculate_yaw(self, yaw: float) -> float:
+        yaw = -yaw * VISION_KP
+
+        if yaw < 0:
+            yaw = yaw - FEEDFORWARD
+        elif yaw > 0:
+            yaw += FEEDFORWARD
+
+        return yaw
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+class DriveToTagWithVision(Command):
+    def __init__(
+        self,
+        dt: DriveTrain,
+        _yaw_getter: Callable[[], float],
+        controller: CommandXboxController,
+        flipped_controls=False,
+        tag_id = 4
+    ):
+        self._dt = dt
+        self._yaw_getter = _yaw_getter
+        self._controller = controller
+        self._flipped = flipped_controls
+        SmartDashboard.putNumber("VisionKP", 0.012)
+        SmartDashboard.putNumber("VisionFF", 0.1)
+        self.addRequirements(self._dt)
+
+    def execute(self):
+        forward = -self._controller.getLeftY()
+        if self._flipped:
+            # Invert the translation
+            forward *= -1
+        yaw: float = self._yaw_getter()
+        if 1000 == yaw:
+            # We didn't get a result, use the joystick
+            if RobotBase.isSimulation:
+                yaw = -self._controller.getRawAxis(constants.CONTROLLER_TURN_SIM)
+            else:
+                yaw = -self._controller.getRightX()
+        else:
+            yaw = self._calculate_yaw(yaw)
+            print ("Yaw: ", yaw)
 
         SmartDashboard.putNumber("Yaw", yaw)
         self._dt.drive_teleop(forward, yaw)
@@ -814,6 +865,7 @@ class TeleopDriveWithVision(Command):
 
         return yaw
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 class TurnToAnglePID(PIDCommand):
     def __init__(self, dt: DriveTrain, angle: float, timeout=2):

@@ -5,6 +5,7 @@ from photonlibpy.photonCamera import (
     PhotonCamera,
     setVersionCheckEnabled,
     PhotonPipelineResult,
+    
 )
 # from photonlibpy.photonTrackedTarget import PhotonTrackedTarget
 from robotpy_apriltag import AprilTagFieldLayout
@@ -246,37 +247,41 @@ class NoteDetectionPhotonCamera:
         self._latest_result: PhotonPipelineResult = PhotonPipelineResult()
 
     def update_camera_results(self) -> None:
-        # self._latest_result = self._camera.getLatestResult()
-        self._latest_result = self._camera.getAllUnreadResults()    ### Updates based on PhotoVision Docs
+        self._latest_result = self._camera.getLatestResult()
+        # self._latest_result = self._camera.getAllUnreadResults()    ### Updates based on PhotoVision Docs
 
     def get_note_yaw(self) -> float:
         """
         Return a float value of the target yaw
         """
+
+#  Looks like the type "PhotonTrackedTarget" is not used.  NEED TO INVESTIGATE  "PhotonPipelineResult"   
+
         # target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
         # target_list: List[PhotonTrackedTarget] = self._latest_result.getBestTarget()  ### Updates based on PhotoVision Docs
-        best_target = self._latest_result.getBestTarget()  ### Updates based on PhotoVision Docs  FINDS BEST TARGET
+        # best_target = self._latest_result.getBestTarget()  ### Updates based on PhotoVision Docs  FINDS BEST TARGET
+        target_list:  List[PhotonPipelineResult] = self._latest_result.getTargets()
 
         # Source:    https://docs.photonvision.org/en/latest/docs/programming/photonlib/getting-target-data.html
 
-        # # If there are no current results, return 1000 to signify no target
-        # if len(target_list) == 0:
-        #     # we have no targets
-        #     return 1000
+        # If there are no current results, return 1000 to signify no target
+        if len(target_list) == 0:
+            # we have no targets
+            return 1000
 
-        # # largest_target = PhotonTrackedTarget()
-        # largest_target = target_list
+        # largest_target = PhotonTrackedTarget()
+        largest_target = target_list
 
-        # # Iterate through each target and grab the largest area,
-        # # which hopefully means we're looking at the closest target
-        # for target in target_list:
-        #     if target.getArea() > largest_target.getArea():
-        #         # This one is bigger
-        #         largest_target = target
+        # Iterate through each target and grab the largest area,
+        # which hopefully means we're looking at the closest target
+        for target in target_list:
+            if target.getArea() > largest_target.getArea():
+                # This one is bigger
+                largest_target = target
 
         # Return the yaw from the target
-        # return largest_target.getYaw()   ####
-        return best_target.getYaw()
+        return largest_target.getYaw()   ####
+        # return best_target.getYaw()
 
 
 class SimpleTagDetectionPhotonCamera:
@@ -299,7 +304,14 @@ class SimpleTagDetectionPhotonCamera:
         Return the yaw of the April Tag, or 1000 if the correct speaker tag isn't
         detected in the pipeline
         """
-        target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
+        # target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
+        target_list: List[PhotonPipelineResult] = self._latest_result.getTargets()
+        # print ("=============(TARGET LIST)===============================")
+        # # print (target_list)
+        # print (">>>> LENGTH of List >>>", len(target_list))
+        # print ("=============(END TARGET LIST)===============================")
+        #  Looks like the type "PhotonTrackedTarget" is not used.  NEED TO INVESTIGATE  "PhotonPipelineResult"   
+
 
         # If there are no current results, return 1000 to signify no target
         if len(target_list) == 0:
@@ -308,7 +320,9 @@ class SimpleTagDetectionPhotonCamera:
 
         # Iterate through the target list and filter on the April tag ID.
         for target in target_list:
+            self._target_fididial_id = 4    ### TEMP
             if target.getFiducialId() == self._target_fididial_id:
+                # print("Distance: ",target.CalculateDistanceToTarget())
                 return target.getYaw()
 
         # We had some targets, but none matched so return the
