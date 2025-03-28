@@ -75,6 +75,8 @@ class DriveTrain(Subsystem):
 
         # Create the PID controller setup for turning
         self.__create_turn_pid_objects()
+        self.__create_AprilTag_tracking_pid_object()    # Used for AprilTags
+
 
         # Create the FF and PID for paths
         self.__create_path_pid_objects()
@@ -207,7 +209,7 @@ class DriveTrain(Subsystem):
 
     def __create_turn_pid_objects(self) -> None:
         self._turn_setpoint = 0
-        self._turn_tolerance = 1  # within 3 degrees we'll call good enough
+        self._turn_tolerance = 2  # within 2 degrees we'll call good enough
         if RobotBase.isSimulation():
             self._turn_pid_controller: PIDController = PIDController(0.002, 0.0, 0.0001)
             self._turn_kF = 0.049
@@ -492,6 +494,29 @@ class DriveTrain(Subsystem):
         if RobotBase.isSimulation():
             wpilib.SmartDashboard.putNumber("TurnPIDOut", pidoutput)
         self.turn_ccw_positive(pidoutput)
+
+#=====(April Tag PID Controller)============================
+
+    def __create_AprilTag_tracking_pid_object(self) -> None:
+        self._tag_setpoint = 0
+        self._tag_tolerance = 2
+        self._tag_pid_controller: PIDController = PIDController(0.02, 0, 0.001)
+        self._tag_kF = 0.1  # TODO Tune me
+        self._tag_pid_controller.setTolerance(self._tag_tolerance)
+        SmartDashboard.putData("Turn TAG PID", self._tag_pid_controller)
+
+    def __config_AprilTag_turn_command(self, desired_angle: float) -> None:
+        self._turn_setpoint = desired_angle
+        self._tag_pid_controller.setSetpoint(self._tag_setpoint)
+        self._tag_pid_controller.setTolerance(self._tag_tolerance)
+        wpilib.SmartDashboard.putNumber("TAG Turn Setpoint", self._turn_setpoint)
+
+    def __calculate_AprilTag_turn_error(self, tag_yaw_offset: float) -> float:
+        self.tag_yaw_offset = tag_yaw_offset
+        self.heading_error = self._tag_pid_controller.calculate(self.tag_yaw_offset)
+        wpilib.SmartDashboard.putNumber("TAG Error", self._turn_setpoint)
+        return self.heading_error
+
 
     ################## Drive train Helpers ##########################
 
@@ -816,37 +841,48 @@ class TeleopDriveWithVision(Command):
         return yaw
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 class DriveToTagWithVision(Command):
-    def __init__(
-        self,
-        dt: DriveTrain,
-        _yaw_getter: Callable[[], float],
-        controller: CommandXboxController,
-        flipped_controls=False,
-        tag_id = 4
-    ):
+    
+    # Goal of this command:
+    # If the robot sees the desired AprilTag, the robot will turn toward the tag and drive slowly at it.
+    # A PID controller is used to stear the robot.
+    # The robot will stop at a specific distance from the tag.
+
+    # If the robot does not see the tag, the robot will rotate clockwise in place until the tag is seen.
+
+    # The robot will stop after 30 seconds.
+
+    #  SEE IF I CAN USE SIMILAR COMMANDS as follows:  (Review absolute heading vs relative heading)
+    #  ALSO SEE IF THIS ONLY CONTROLS HEADING AND SETS FORWARD SPEED TO ZERO.
+        # wpilib.SmartDashboard.putData(
+        #     "Turn-90",
+        #     self._drivetrain.configure_turn_pid(-90).andThen(
+        #         self._drivetrain.turn_with_pid().withName("TurnTo -90"),
+        #     ),
+        # )
+        ##  NO_GO  "turn_with_pid" uses the current gyro heading of  the robot
+        #
+        #  PID controller:   _tag_pid_controller
+    
+    
+    def __init__(self, dt: DriveTrain, _yaw_getter: Callable[[], float], tag_id):  
         self._dt = dt
         self._yaw_getter = _yaw_getter
-        self._controller = controller
-        self._flipped = flipped_controls
         SmartDashboard.putNumber("VisionKP", 0.012)
         SmartDashboard.putNumber("VisionFF", 0.1)
+        self.dt._tag_pid_controller
         self.addRequirements(self._dt)
 
     def execute(self):
-        forward = -self._controller.getLeftY()
-        if self._flipped:
-            # Invert the translation
-            forward *= -1
+        forward = 0
         yaw: float = self._yaw_getter()
         if 1000 == yaw:
-            # We didn't get a result, use the joystick
-            if RobotBase.isSimulation:
-                yaw = -self._controller.getRawAxis(constants.CONTROLLER_TURN_SIM)
-            else:
-                yaw = -self._controller.getRightX()
+            # We didn't get a result, slowly turn the robot
+            yaw = 0.1
         else:
-            yaw = self._calculate_yaw(yaw)
+            yaw = self._calculate_yaw(yaw)     # performed in Vision subsystem
             print ("Yaw: ", yaw)
+            # Estimate distance from the Tag
+
 
         SmartDashboard.putNumber("Yaw", yaw)
         self._dt.drive_teleop(forward, yaw)

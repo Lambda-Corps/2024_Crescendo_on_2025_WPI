@@ -24,7 +24,7 @@ from pathplannerlib.auto import (
    # ReplanningConfig,
 )
 from phoenix6 import SignalLogger
-from drivetrain import DriveTrain, TeleopDriveWithVision, TurnToAnglePID
+from drivetrain import DriveTrain, TeleopDriveWithVision, TurnToAnglePID, DriveToTagWithVision
 from intake import Intake, IntakeCommand, DefaultIntakeCommand, EjectNote
 from shooter import Shooter, SetShooter, ShooterPosition
 from robot_commands import ShootCommand, StopIndexAndShooter, DoubleShootCommand
@@ -93,23 +93,20 @@ class MyRobot(TimedCommandRobot):
         self._current_pose = Pose2d()
 
     def __configure_button_bindings(self) -> None:
-        # Driver controller controls first
+
+        #========( Driver controller controls )================================
         self._driver_controller.a().whileTrue(IntakeCommand(self._intake))
 
-        # Left Button Note Aim
-        # The WPILIB enum and our controller mapping are different.  On the Zorro
-        # controller, the "right bumper" according to WPILib is actually the left
-        # button that would be by a trigger
-        self._driver_controller.rightBumper().whileTrue(
-            TeleopDriveWithVision(
-                self._drivetrain, self._vision.get_note_yaw, self._driver_controller
-            ).withName("Note Driving")
-        )
-        # Right Trigger April Tag
-        # Create a button that maps to the proper integer number (found in driverstation)
-        # self._right_controller_button: JoystickButton = JoystickButton(
-        #     self._driver_controller.getHID(), 9  # TODO -- Assign this correct number
+
+        # self._driver_controller.rightBumper().whileTrue(
+        #     TeleopDriveWithVision(
+        #         self._drivetrain, self._vision.get_note_yaw, self._driver_controller
+        #     ).withName("Note Driving")
         # )
+
+        self._driver_controller.rightBumper().whileTrue(
+            DriveToTagWithVision(self._drivetrain, self._vision.get_note_yaw,4).withName("Auto Drive to Tag")
+        )
 
         self._driver_controller.leftBumper().whileTrue(
             TeleopDriveWithVision(
@@ -121,16 +118,6 @@ class MyRobot(TimedCommandRobot):
         #     TeleopDriveWithVision(
         #         self._drivetrain, self._vision.get_tag_yaw, self._driver_controller
         #     ).withName("Tag Driving")
-        # )
-
-        # self._driver_controller.rightBumper().whileTrue(
-        #     RunCommand(
-        #         lambda: self._drivetrain.drive_teleop(
-        #             self._driver_controller.getLeftY(),
-        #             -self._driver_controller.getRightX(),
-        #         ),
-        #         self._drivetrain,
-        #     ).withName("FlippedControls")
         # )
 
         # wpilib.SmartDashboard.putData(
@@ -178,10 +165,8 @@ class MyRobot(TimedCommandRobot):
             SetShooter(self._shooter, ShooterPosition.AMP)
         )
 
-        wpilib.SmartDashboard.putData("Turn90", TurnToAnglePID(self._drivetrain, 90, 3))
-        wpilib.SmartDashboard.putData(
-            "Turn-90", TurnToAnglePID(self._drivetrain, -90, 3)
-        )
+        wpilib.SmartDashboard.putData("Turn90",  TurnToAnglePID(self._drivetrain,  90, 3))
+        wpilib.SmartDashboard.putData("Turn-90", TurnToAnglePID(self._drivetrain, -90, 3))
 
     def __configure_default_commands(self) -> None:
         # Setup the default commands for subsystems
