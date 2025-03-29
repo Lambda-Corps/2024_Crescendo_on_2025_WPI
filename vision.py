@@ -323,6 +323,7 @@ class SimpleTagDetectionPhotonCamera:
             self._target_fididial_id = 4    ### TEMP
             if target.getFiducialId() == self._target_fididial_id:
                 # print("Distance: ",target.CalculateDistanceToTarget())
+                
                 return target.getYaw()
 
         # We had some targets, but none matched so return the

@@ -518,6 +518,9 @@ class DriveTrain(Subsystem):
         return self.heading_error
 
 
+    def __AprilTag_at_turn_setpoint(self) -> bool:
+        return self._tag_pid_controller.atSetpoint()
+
     ################## Drive train Helpers ##########################
 
     def __deadband(self, input: float, abs_min: float) -> float:
@@ -869,8 +872,13 @@ class DriveToTagWithVision(Command):
         self._yaw_getter = _yaw_getter
         SmartDashboard.putNumber("VisionKP", 0.012)
         SmartDashboard.putNumber("VisionFF", 0.1)
-        self.dt._tag_pid_controller
+        forward = 0
+        yaw = 0
         self.addRequirements(self._dt)
+
+    def initialize(self):
+        self._dt.__config_AprilTag_turn_command(0)   # we want the taget offset to be zero
+        forward = 0.1  # What is the minimal forward speed
 
     def execute(self):
         forward = 0
@@ -879,17 +887,20 @@ class DriveToTagWithVision(Command):
             # We didn't get a result, slowly turn the robot
             yaw = 0.1
         else:
-            yaw = self._calculate_yaw(yaw)     # performed in Vision subsystem
-            print ("Yaw: ", yaw)
-            # Estimate distance from the Tag
+            yaw = self._calculate_yaw(yaw)     # performed in Vision subsystem (in Radians)
+            yaw = self._dt.__calculate_AprilTag_turn_error(yaw)   # Calculate turn speed 
 
+
+            print ("Forward: ", forward, "   Yaw: ", yaw)
 
         SmartDashboard.putNumber("Yaw", yaw)
-        self._dt.drive_teleop(forward, yaw)
+        self._dt.drive_teleop(forward, yaw)   # + is to the right
 
     def isFinished(self) -> bool:
         # Should only run while button is held, return False
-        return False
+        heading_angle_returned_value = self._dt.__AprilTag_at_turn_setpoint()
+        print ("Have we reached the setpoint: ", heading_angle_returned_value)
+        return heading_angle_returned_value
 
     def _calculate_yaw(self, yaw: float) -> float:
         yaw = -yaw * VISION_KP
