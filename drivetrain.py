@@ -75,7 +75,7 @@ class DriveTrain(Subsystem):
 
         # Create the PID controller setup for turning
         self.__create_turn_pid_objects()
-        self.__create_AprilTag_tracking_pid_object()    # Used for AprilTags
+        self.create_AprilTag_tracking_pid_object()    # Used for AprilTags
 
 
         # Create the FF and PID for paths
@@ -497,28 +497,30 @@ class DriveTrain(Subsystem):
 
 #=====(April Tag PID Controller)============================
 
-    def __create_AprilTag_tracking_pid_object(self) -> None:
+    def create_AprilTag_tracking_pid_object(self) -> None:
         self._tag_setpoint = 0
         self._tag_tolerance = 2
-        self._tag_pid_controller: PIDController = PIDController(0.02, 0, 0.001)
+        # self._tag_pid_controller: PIDController = PIDController(0.02, 0, 0.001)
+        self._tag_pid_controller: PIDController = PIDController(0.05, 0, 0.001)
         self._tag_kF = 0.1  # TODO Tune me
         self._tag_pid_controller.setTolerance(self._tag_tolerance)
         SmartDashboard.putData("Turn TAG PID", self._tag_pid_controller)
 
-    def __config_AprilTag_turn_command(self, desired_angle: float) -> None:
+    def config_AprilTag_turn_command(self, desired_angle: float) -> None:
         self._turn_setpoint = desired_angle
         self._tag_pid_controller.setSetpoint(self._tag_setpoint)
         self._tag_pid_controller.setTolerance(self._tag_tolerance)
         wpilib.SmartDashboard.putNumber("TAG Turn Setpoint", self._turn_setpoint)
 
-    def __calculate_AprilTag_turn_error(self, tag_yaw_offset: float) -> float:
+    def calculate_AprilTag_turn_error(self, tag_yaw_offset: float) -> float:
         self.tag_yaw_offset = tag_yaw_offset
         self.heading_error = self._tag_pid_controller.calculate(self.tag_yaw_offset)
+        print (">>>>> set point: ", self._tag_pid_controller.getSetpoint()  , "   Input: ", self.tag_yaw_offset)
         wpilib.SmartDashboard.putNumber("TAG Error", self._turn_setpoint)
         return self.heading_error
 
 
-    def __AprilTag_at_turn_setpoint(self) -> bool:
+    def AprilTag_at_turn_setpoint(self) -> bool:
         return self._tag_pid_controller.atSetpoint()
 
     ################## Drive train Helpers ##########################
@@ -877,28 +879,33 @@ class DriveToTagWithVision(Command):
         self.addRequirements(self._dt)
 
     def initialize(self):
-        self._dt.__config_AprilTag_turn_command(0)   # we want the taget offset to be zero
+        self._dt.config_AprilTag_turn_command(0)   # we want the taget offset to be zero
         forward = 0.1  # What is the minimal forward speed
 
     def execute(self):
         forward = 0
+        heading_movement_to_correct_yaw_error = 0
         yaw: float = self._yaw_getter()
+        # print ("VISION YAW: ", yaw)
         if 1000 == yaw:
             # We didn't get a result, slowly turn the robot
             yaw = 0.1
         else:
-            yaw = self._calculate_yaw(yaw)     # performed in Vision subsystem (in Radians)
-            yaw = self._dt.__calculate_AprilTag_turn_error(yaw)   # Calculate turn speed 
+            yaw = 57.3 * self._calculate_yaw(yaw)     # performed in Vision subsystem (in Radians)
+            # print ("   INPUT TO CALCULATION: ", yaw)
+            heading_movement_to_correct_yaw_error = 0 - self._dt.calculate_AprilTag_turn_error(yaw)   # Calculate turn speed 
+            
+       # vision target to right of center + yaw
+       # Driving + values turn robot to the left
 
-
-            print ("Forward: ", forward, "   Yaw: ", yaw)
+        print ("Forward: ", forward, "   Vision Yaw: ", yaw, "   driving yaw", heading_movement_to_correct_yaw_error)
 
         SmartDashboard.putNumber("Yaw", yaw)
-        self._dt.drive_teleop(forward, yaw)   # + is to the right
+        self._dt.drive_teleop(forward, heading_movement_to_correct_yaw_error/10)   # + is to the right
 
     def isFinished(self) -> bool:
         # Should only run while button is held, return False
-        heading_angle_returned_value = self._dt.__AprilTag_at_turn_setpoint()
+        heading_angle_returned_value = self._dt.AprilTag_at_turn_setpoint()
         print ("Have we reached the setpoint: ", heading_angle_returned_value)
         return heading_angle_returned_value
 

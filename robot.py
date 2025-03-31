@@ -105,7 +105,7 @@ class MyRobot(TimedCommandRobot):
         # )
 
         self._driver_controller.rightBumper().whileTrue(
-            DriveToTagWithVision(self._drivetrain, self._vision.get_note_yaw,4).withName("Auto Drive to Tag")
+            DriveToTagWithVision(self._drivetrain, self._vision.get_tag_yaw,4).withName("Auto Drive to Tag")
         )
 
         self._driver_controller.leftBumper().whileTrue(

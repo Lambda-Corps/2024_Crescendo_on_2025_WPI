@@ -307,7 +307,7 @@ class SimpleTagDetectionPhotonCamera:
         # target_list: List[PhotonTrackedTarget] = self._latest_result.getTargets()
         target_list: List[PhotonPipelineResult] = self._latest_result.getTargets()
         # print ("=============(TARGET LIST)===============================")
-        # # print (target_list)
+        # print (target_list)
         # print (">>>> LENGTH of List >>>", len(target_list))
         # print ("=============(END TARGET LIST)===============================")
         #  Looks like the type "PhotonTrackedTarget" is not used.  NEED TO INVESTIGATE  "PhotonPipelineResult"   
@@ -316,13 +316,17 @@ class SimpleTagDetectionPhotonCamera:
         # If there are no current results, return 1000 to signify no target
         if len(target_list) == 0:
             # we have no targets
+            # print ("No Targets")
             return 1000
 
         # Iterate through the target list and filter on the April tag ID.
         for target in target_list:
             self._target_fididial_id = 4    ### TEMP
             if target.getFiducialId() == self._target_fididial_id:
+                # print ("Correct ID")
+
                 # print("Distance: ",target.CalculateDistanceToTarget())
+                # print (">>>>   target.getYaw() ",  target.getYaw())
                 
                 return target.getYaw()
 
