@@ -30,7 +30,7 @@ from phoenix6.signals.spn_enums import (
     InvertedValue,
     NeutralModeValue,
     FeedbackSensorSourceValue,
-    MotionMagicIsRunningValue,
+    # MotionMagicIsRunningValue,   #### 2206
     ControlModeValue,
 )
 from phoenix6.sim import ChassisReference
@@ -67,6 +67,8 @@ class DriveTrain(Subsystem):
 
     def __init__(self, test_mode=False) -> None:
         super().__init__()
+
+
         self._gyro: navx.AHRS = navx.AHRS.create_spi()
 
         # Create the output objects for the talons, currently one each for

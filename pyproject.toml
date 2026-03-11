@@ -6,12 +6,12 @@
 [tool.robotpy]
 
 # Version of robotpy this project depends on
-robotpy_version = "2025.3.2.0"
-
+robotpy_version = "2026.2.1.1"
 
 # Which extra RobotPy components should be installed
 # -> equivalent to `pip install robotpy[extra1, ...]
-robotpy_extras = [
+
+components = [
     # "all"
     #"apriltag",
     "commands2",
@@ -34,3 +34,10 @@ requires = [
     "robotpy-pathplannerlib>=2024.2.6",
     "numpy"
 ]
+
+#  NOTES:  DF:  03/10/2026
+#  pip install robotpy-navx
+# ABOVE DID NOT APPEAR TO WORK.  IT correupted robotpy, needed to uninstall and reinstall
+#
+# python3 -m pip install --upgrade robotpy robotpy-ctre
+#
