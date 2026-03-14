@@ -129,9 +129,10 @@ class Shooter(Subsystem):
         config.motor_output.neutral_mode = NeutralModeValue.COAST
         talon.configurator.apply(config)
 
-        talon.set_control(
-            Follower(constants.FLYWHEEL_LEFT, oppose_master_direction=True)
-        )
+        #### DF:  talon.set_control(
+        #### DF:      # Follower(constants.FLYWHEEL_LEFT, oppose_master_direction=True)
+        #### DF:      Follower(constants.FLYWHEEL_LEFT, True)
+        #### DF:  )
 
         # Setup the second set of flywheels
         self.lowerright = TalonSRX(constants.INDEX_RIGHT)

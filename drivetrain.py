@@ -25,7 +25,7 @@ from phoenix6.configs import (
     Slot0Configs,
 )
 from phoenix6.hardware.talon_fx import TalonFX
-from phoenix6.controls.follower import Follower
+# from phoenix6.controls.follower import Follower
 from phoenix6.signals.spn_enums import (
     InvertedValue,
     NeutralModeValue,
@@ -41,6 +41,7 @@ from phoenix6.controls import (
 )
 from phoenix6.unmanaged import feed_enable
 import navx
+# from navx import AHRS
 from pathplannerlib.path import PathPlannerPath
 # from pathplannerlib.commands import FollowPathRamsete
 # from pathplannerlib.config import ReplanningConfig, PIDConstants
@@ -168,10 +169,10 @@ class DriveTrain(Subsystem):
             constants.DT_WHEEL_RADIUS_INCHES,
         )
 
-        self._left_leader.sim_state.orientation = ChassisReference.Clockwise_Positive
-        self._right_leader.sim_state.orientation = (
-            ChassisReference.CounterClockwise_Positive
-        )
+        ####### DF:  self._left_leader.sim_state.orientation = ChassisReference.Clockwise_Positive
+        ####### DF:  self._right_leader.sim_state.orientation = (
+        ####### DF:      ChassisReference.CounterClockwise_Positive
+        ####### DF:  )
 
     def __configure_motion_magic(self, config: TalonFXConfiguration) -> None:
         self._mm_setpoint = 0
@@ -246,7 +247,7 @@ class DriveTrain(Subsystem):
 
     def __configure_left_side_drive(self) -> None:
         self._left_leader = TalonFX(constants.DT_LEFT_LEADER)
-        self._left_follower = TalonFX(constants.DT_LEFT_FOLLOWER)
+        ##### DF:   self._left_follower = TalonFX(constants.DT_LEFT_FOLLOWER)
         # Applying a new configuration will erase all other config settings since we start with a blank config
         # so each setting needs to be explicitly set here in the config method
         config = TalonFXConfiguration()
@@ -277,26 +278,26 @@ class DriveTrain(Subsystem):
             if ret == StatusCode.is_ok:
                 break
 
-        for i in range(0, 6):  # Try 5 times
-            ret = self._left_follower.configurator.apply(config)
-            if ret == StatusCode.is_ok:
-                break
+        # for i in range(0, 6):  # Try 5 times
+        #     ret = self._left_follower.configurator.apply(config)
+        #     if ret == StatusCode.is_ok:
+        #         break
 
         # self._left_follower.set_control(Follower(self._left_leader.device_id, False))
-        self._left_leader.sim_state.Orientation = ChassisReference.Clockwise_Positive
+        #######  DF:   self._left_leader.sim_state.Orientation = ChassisReference.Clockwise_Positive
         # self._left_follower.sim_state.Orientation = (
         #     ChassisReference.Clockwise_Positive
         # )
 
         # Set the left follower to only follow master
-        follow_request = Follower(constants.DT_LEFT_LEADER, False)
-        self._left_follower.set_control(follow_request)
+        ##### DF:   follow_request = Follower(constants.DT_LEFT_LEADER, False)
+        ##### DF:   self._left_follower.set_control(follow_request)
 
         self._left_leader.set_position(0)
 
     def __configure_right_side_drive(self) -> None:
         self._right_leader = TalonFX(constants.DT_RIGHT_LEADER)
-        self._right_follower = TalonFX(constants.DT_RIGHT_FOLLOWER)
+        ##### DF:   self._right_follower = TalonFX(constants.DT_RIGHT_FOLLOWER)
         # Applying a new configuration will erase all other config settings since we start with a blank config
         # so each setting needs to be explicitly set here in the config method
         config = TalonFXConfiguration()
@@ -327,20 +328,20 @@ class DriveTrain(Subsystem):
             if ret == StatusCode.is_ok:
                 break
 
-        for i in range(0, 6):  # Try 5 times
-            ret = self._right_follower.configurator.apply(config)
-            if ret == StatusCode.is_ok:
-                break
+        # for i in range(0, 6):  # Try 5 times
+        #     ret = self._right_follower.configurator.apply(config)
+        #     if ret == StatusCode.is_ok:
+        #         break
 
         # self._right_follower.set_control(Follower(self._right_leader.device_id, False))
-        self._right_leader.sim_state.Orientation = (
-            ChassisReference.CounterClockwise_Positive
-        )
+        ##### DF:   self._right_leader.sim_state.Orientation = (
+        ##### DF:       ChassisReference.CounterClockwise_Positive
+        ##### DF:   )
         # self._right_follower.sim_state.Orientation = ChassisReference.CounterClockwise_Positive
 
         # Set the right side follower to go with leader
-        follow_request = Follower(constants.DT_RIGHT_LEADER, False)
-        self._right_follower.set_control(follow_request)
+        ##### DF:   follow_request = Follower(constants.DT_RIGHT_LEADER, False)
+        ##### DF:   self._right_follower.set_control(follow_request)
 
         self._right_leader.set_position(0)
 
@@ -445,7 +446,7 @@ class DriveTrain(Subsystem):
         self.drive_velocity_volts(speeds.left, speeds.right)
 
     def drive_motion_magic(self) -> None:
-        self._left_leader.set_control(Follower(self._right_leader.device_id, False))
+        ##### DF:   self._left_leader.set_control(Follower(self._right_leader.device_id, False))
         self._right_leader.set_control(self._mm_out)
 
     def turn_ccw_positive(self, speed: float) -> None:
@@ -635,12 +636,12 @@ class DriveTrain(Subsystem):
         self._right_leader.sim_state.set_supply_voltage(
             wpilib.RobotController.getBatteryVoltage()
         )
-        self._left_follower.sim_state.set_supply_voltage(
-            wpilib.RobotController.getBatteryVoltage()
-        )
-        self._right_follower.sim_state.set_supply_voltage(
-            wpilib.RobotController.getBatteryVoltage()
-        )
+        # self._left_follower.sim_state.set_supply_voltage(
+        #     wpilib.RobotController.getBatteryVoltage()
+        # )
+        # self._right_follower.sim_state.set_supply_voltage(
+        #     wpilib.RobotController.getBatteryVoltage()
+        # )
 
         # Apply the motor inputs to the simulation
         self._drivesim.setInputs(
@@ -664,18 +665,18 @@ class DriveTrain(Subsystem):
         self._right_leader.sim_state.set_rotor_velocity(
             self.__velocity_feet_to_rps(self._drivesim.getRightVelocityFps())
         )
-        self._left_follower.sim_state.set_raw_rotor_position(
-            self.__feet_to_encoder_rotations(self._drivesim.getLeftPositionFeet())
-        )
-        self._left_follower.sim_state.set_rotor_velocity(
-            self.__velocity_feet_to_rps(self._drivesim.getLeftVelocityFps())
-        )
-        self._right_follower.sim_state.set_raw_rotor_position(
-            self.__feet_to_encoder_rotations(self._drivesim.getRightPositionFeet())
-        )
-        self._right_follower.sim_state.set_rotor_velocity(
-            self.__velocity_feet_to_rps(self._drivesim.getRightVelocityFps())
-        )
+        # self._left_follower.sim_state.set_raw_rotor_position(
+        #     self.__feet_to_encoder_rotations(self._drivesim.getLeftPositionFeet())
+        # )
+        # self._left_follower.sim_state.set_rotor_velocity(
+        #     self.__velocity_feet_to_rps(self._drivesim.getLeftVelocityFps())
+        # )
+        # self._right_follower.sim_state.set_raw_rotor_position(
+        #     self.__feet_to_encoder_rotations(self._drivesim.getRightPositionFeet())
+        # )
+        # self._right_follower.sim_state.set_rotor_velocity(
+        #     self.__velocity_feet_to_rps(self._drivesim.getRightVelocityFps())
+        # )
 
         # Update the gyro simulation
         degrees = self._drivesim.getHeading().degrees()

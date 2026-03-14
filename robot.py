@@ -77,7 +77,7 @@ class MyRobot(TimedCommandRobot):
         # self._climber: Climber = Climber()
         # wpilib.SmartDashboard.putData("Climber", self._climber)
 
-        self._vision: VisionSystem = VisionSystem(False, True)
+        #### DF:  self._vision: VisionSystem = VisionSystem(False, True)
         # self._vision: VisionSystem = VisionSystem(True, True)
 
         self.__configure_default_commands()
@@ -99,21 +99,22 @@ class MyRobot(TimedCommandRobot):
         # The WPILIB enum and our controller mapping are different.  On the Zorro
         # controller, the "right bumper" according to WPILib is actually the left
         # button that would be by a trigger
-        self._driver_controller.rightBumper().whileTrue(
-            TeleopDriveWithVision(
-                self._drivetrain, self._vision.get_note_yaw, self._driver_controller
-            ).withName("Note Driving")
-        )
+        #### DF:  self._driver_controller.rightBumper().whileTrue(
+        #### DF:      TeleopDriveWithVision(
+        #### DF:          self._drivetrain, self._vision.get_note_yaw, self._driver_controller
+        #### DF:      
+        # ).withName("Note Driving")
+        #### DF:  )
         # Right Trigger April Tag
         # Create a button that maps to the proper integer number (found in driverstation)
         self._right_controller_button: JoystickButton = JoystickButton(
             self._driver_controller.getHID(), 9  # TODO -- Assign this correct number
         )
-        self._right_controller_button.whileTrue(
-            TeleopDriveWithVision(
-                self._drivetrain, self._vision.get_tag_yaw, self._driver_controller
-            ).withName("Tag Driving")
-        )
+        #### DF:  self._right_controller_button.whileTrue(
+        #### DF:      TeleopDriveWithVision(
+        #### DF:          self._drivetrain, self._vision.get_tag_yaw, self._driver_controller
+        #### DF:      ).withName("Tag Driving")
+        #### DF:  )
 
         # self._driver_controller.rightBumper().whileTrue(
         #     RunCommand(
